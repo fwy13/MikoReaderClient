@@ -189,14 +189,12 @@ const Chapter = ({ params }: { params: { type: string; manga: string } }) => {
                         <h2 className="text-[2em] text-[#f294b6]">
                             Các Chương
                         </h2>
-                        <ul className="gap-2">
-                            {IsData.fullChapter.map(
-                                (item, index: number) => (
-                                    <Link href={item.url} key={index}>
-                                    <li >{item.name}</li>
-                                    </Link>
-                                )
-                            )}
+                        <ul className="grid grid-cols-5 grid-rows-5 gap-4">
+                            {IsData.fullChapter.map((item, index: number) => (
+                                <Link href={item.url} key={index} className="p-2 border border-rose-500 text-rose-500 text-center">
+                                    <li>{item.name}</li>
+                                </Link>
+                            ))}
                         </ul>
                     </div>
                 </div>

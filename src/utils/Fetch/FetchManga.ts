@@ -10,9 +10,9 @@ interface AllType {
 }
 
 interface Chapter {
-    chapterId: number,
-    name: string
-    url: string
+    chapterId: number;
+    name: string;
+    url: string;
 }
 export interface DataManga {
     title: string;
@@ -41,13 +41,21 @@ export default async function FetchManga({
     )
         .then((res) => res.text())
         .then(async (html) => {
-            const DataFullChapter = await FetchChap({
-                IdManga: IdManga.split("-")[IdManga.split("-").length - 1],
-            });
+            
             const $ = cheerio.load(html);
             const el: any = $(".list-info").find("li");
             const elLength = $(".list-info").find("li").length;
             const elRating: any = $(".mrt5").find("span");
+            var idManga: string = "";
+            $("meta", html).each((index: number, item: any) => {
+                if (item.attribs.property === "og:image") {
+                    const elContent = item.attribs.content.split("/")[item.attribs.content.split("/").length - 1]
+                    idManga = elContent.slice(0, elContent.length - 4)
+                }
+            });
+            const DataFullChapter = await FetchChap({
+                IdManga: idManga,
+            });
             const elFollow: any = $(".follow").find("span")[1].children[1];
             const elImage: any = $(".col-image")[0].children[1];
             const elContent: any =
