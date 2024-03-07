@@ -2,7 +2,6 @@ import * as cheerio from "cheerio";
 import { Dispatch, SetStateAction } from "react";
 import Url from "../constants";
 
-
 export default async function FetchDataUpdate({
     setData,
 }: {
@@ -26,7 +25,9 @@ export default async function FetchDataUpdate({
                             const Children: any = $(this).parent().find("span")[
                                 index
                             ].children[childrens];
-                            return Children.data;
+                            if (Children) {
+                                return Children.data
+                            }
                         }
                     };
                     if (InformationManga[1]) {
@@ -57,7 +58,7 @@ export default async function FetchDataUpdate({
                         const TimeUpdate = item.children[1].children[0].data;
                         return { ChapterUpdate, TimeUpdate };
                     });
-                    console.log()
+                    console.log();
                     ArrayData.push({
                         title: titleAfter,
                         url: href?.slice(27),

@@ -1,7 +1,7 @@
-const Manga = ({ params }: { params: { manga: string } }) => {
+const Manga = ({ params }: { params: { type: string } }) => {
     return (
         <>
-            <span>Manga Name: {params.manga}</span>
+            <span>Manga Name: {params.type}</span>
         </>
     );
 };

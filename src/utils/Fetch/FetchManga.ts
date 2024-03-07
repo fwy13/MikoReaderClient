@@ -2,12 +2,18 @@ import { Dispatch, SetStateAction } from "react";
 import Url from "../constants";
 
 import * as cheerio from "cheerio";
+import FetchChap from "./FetchChap";
 
 interface AllType {
     href: string;
     title: string;
 }
 
+interface Chapter {
+    chapterId: number,
+    name: string
+    url: string
+}
 export interface DataManga {
     title: string;
     updateTime: string;
@@ -15,6 +21,12 @@ export interface DataManga {
     status: string;
     AllTypes: AllType[];
     view: string;
+    rating: string;
+    follow: string;
+    image: string;
+    content: string;
+    fullChapter: Chapter[];
+    load: boolean;
 }
 
 export default async function FetchManga({
@@ -28,11 +40,18 @@ export default async function FetchManga({
         `https://corsproxy.org/?https://www.nettruyenbb.com/truyen-tranh/${IdManga}`
     )
         .then((res) => res.text())
-        .then((html) => {
+        .then(async (html) => {
+            const DataFullChapter = await FetchChap({
+                IdManga: IdManga.split("-")[IdManga.split("-").length - 1],
+            });
             const $ = cheerio.load(html);
             const el: any = $(".list-info").find("li");
             const elLength = $(".list-info").find("li").length;
-
+            const elRating: any = $(".mrt5").find("span");
+            const elFollow: any = $(".follow").find("span")[1].children[1];
+            const elImage: any = $(".col-image")[0].children[1];
+            const elContent: any =
+                $(".detail-content").find("p")[0].children[0];
             if (elLength === 4) {
                 var author = "";
                 if (el[0].children[3].children[0].data) {
@@ -40,22 +59,29 @@ export default async function FetchManga({
                 } else {
                     author = el[0].children[3].children[0].children[0].data;
                 }
-                const status = el[1].children[3].children[0].data;
-                const type = el[2].children[3].children;
-                const view = el[3].children[3].children[0].data;
-                const AllTypes: AllType[] = [];
-                type.forEach((types: any) => {
-                    if (types.attribs) {
-                        AllTypes.push({
-                            href: types.attribs.href.slice(27),
-                            title: types.children[0].data,
-                        });
-                    }
-                });
                 const elTitle: any = $(".title-detail")[0].children[0];
                 const elTime: any = $(".small")[0].children[0];
                 const title = elTitle.data;
                 const updateTime = elTime.data;
+                const status = el[1].children[3].children[0].data;
+                const type = el[2].children[3].children;
+                const view = el[3].children[3].children[0].data;
+                const image = `https:${elImage.attribs.src}`;
+                const rating = `${elRating[1].children[1].children[0].data} / ${elRating[1].children[3].children[0].data} - ${elRating[1].children[5].children[0].data} lượt đánh giá`;
+                const follow = elFollow.children[0].data;
+                var content = elContent.data;
+                if (content === "\n") {
+                    content = `Truyện Tranh ${title} được cập nhật tại Miko Reader. Hãy ủng hộ và chia sẻ giúp tranh nhé.`;
+                }
+                const AllTypes: AllType[] = [];
+                type.forEach((types: any) => {
+                    if (types.attribs) {
+                        AllTypes.push({
+                            href: types.attribs.href.slice(39),
+                            title: types.children[0].data,
+                        });
+                    }
+                });
                 setData({
                     title,
                     updateTime,
@@ -63,6 +89,12 @@ export default async function FetchManga({
                     status,
                     AllTypes,
                     view,
+                    rating,
+                    follow,
+                    image,
+                    content,
+                    fullChapter: DataFullChapter,
+                    load: false,
                 });
             } else {
                 var author = "";
@@ -71,9 +103,20 @@ export default async function FetchManga({
                 } else {
                     author = el[1].children[3].children[0].children[0].data;
                 }
+                const elTitle: any = $(".title-detail")[0].children[0];
+                const elTime: any = $(".small")[0].children[0];
+                const title = elTitle.data;
+                const updateTime = elTime.data;
                 const status = el[2].children[3].children[0].data;
                 const type = el[3].children[3].children;
                 const view = el[4].children[3].children[0].data;
+                const image = `https:${elImage.attribs.src}`;
+                const rating = `${elRating[1].children[1].children[0].data} / ${elRating[1].children[3].children[0].data} - ${elRating[1].children[5].children[0].data} lượt đánh giá`;
+                const follow = elFollow.children[0].data;
+                var content = elContent.data;
+                if (content === "\n") {
+                    content = `Truyện Tranh ${title} được cập nhật tại Miko Reader. Hãy ủng hộ và chia sẻ giúp tranh nhé.`;
+                }
                 const AllTypes: AllType[] = [];
                 type.forEach((types: any) => {
                     if (types.attribs) {
@@ -83,10 +126,6 @@ export default async function FetchManga({
                         });
                     }
                 });
-                const elTitle: any = $(".title-detail")[0].children[0];
-                const elTime: any = $(".small")[0].children[0];
-                const title = elTitle.data;
-                const updateTime = elTime.data;
                 setData({
                     title,
                     updateTime,
@@ -94,6 +133,12 @@ export default async function FetchManga({
                     status,
                     AllTypes,
                     view,
+                    rating,
+                    follow,
+                    image,
+                    content,
+                    fullChapter: DataFullChapter,
+                    load: false,
                 });
             }
         });
